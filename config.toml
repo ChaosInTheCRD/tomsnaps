@@ -1,6 +1,7 @@
 baseURL      = "https://www.example.com/"
 title        = "Gallery Deluxe"
 disableKinds = ["section", "taxonomy", "term"]
+theme = "gallerydeluxe"
 
 [params]
     # Set to enable Plausible Analytics.
