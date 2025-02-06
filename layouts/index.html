@@ -1,38 +1,57 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, 
-          initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ .Title }}</title>
     <link rel="icon" href="favicon.svg" />
     {{ partial "gallerydeluxe/head.html" . }}
     {{ partial "head.html" . }}
   </head>
 
-  <a class="logo" href="{{ site.Home.RelPermalink }}">
-    {{ partial "logo.html" . }}
-  </a>
+  {{/* DEBUG: Print bundle info */}}
+  {{ warnf "Loading image bundle from 'images' section" }}
 
   {{ $bundle := site.GetPage "images" }}
+  {{ if not $bundle }}
+    {{ errorf "Bundle 'images' not found!" }}
+  {{ else }}
+    {{ warnf "Found image bundle: %s" $bundle }}
+  {{ end }}
+
   {{ $imagesList := $bundle.Resources.GetMatch "images.txt" }}
+  {{ if not $imagesList }}
+    {{ errorf "Could not find images.txt inside the bundle!" }}
+  {{ else }}
+    {{ warnf "Loaded images.txt with content:\n%s" $imagesList.Content }}
+  {{ end }}
+
+  {{/* Split file contents into a list of URLs */}}
   {{ $imagesURLs := split $imagesList.Content "\n" }}
   {{ $images := slice }}
+
   {{ range $imagesURLs }}
     {{ $imageURL := trim . "\r\n " }}
-    {{ $resource := resources.GetRemote $imageURL }}
-    {{ if $resource }}
-      {{ $images = $images | append $resource }}
+
+    {{ if eq $imageURL "" }}
+      {{ warnf "Skipping empty line in images.txt" }}
     {{ else }}
-      {{ warnf "Failed to fetch %s" $imageURL }}
+      {{ warnf "Attempting to fetch: %s" $imageURL }}
+      {{ $resource := resources.GetRemote $imageURL }}
+
+      {{ if $resource }}
+        {{ warnf "Successfully fetched: %s" $imageURL }}
+        {{ $images = $images | append $resource }}
+      {{ else }}
+        {{ errorf "Failed to fetch image: %s" $imageURL }}
+      {{ end }}
     {{ end }}
   {{ end }}
+
+  {{ warnf "Final image list contains %d items" (len $images) }}
+
   {{ $gallery := partial "gallerydeluxe/init.html" (dict "images" $images) }}
   {{ $params := site.Params.gallerydeluxe }}
-  {{/* We currently only support 1 gallery per page, which is create4 by an element with id 'gallerydeluxe',
-    and a valid data url.
-  */}}
+
   <body id="gallerydeluxe" data-gd-image-data-url="{{ $gallery.imageDataUrl }}">
     <div id="gd-modal" class="gd-modal">
       <span id="gd-modal-close" class="gd-modal-close">&times;</span>
