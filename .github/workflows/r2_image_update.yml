@@ -1,0 +1,35 @@
+name: Update R2 URLs List
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Runs every 24 hours at midnight UTC
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  update-r2-urls:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install AWS CLI
+        run: |
+          sudo apt update
+          sudo apt install -y awscli
+
+      - name: List all object URLs
+        run: |
+          aws s3api list-objects-v2 \
+            --endpoint-url ${{ vars.R2_ENDPOINT_URL }} \
+            --bucket ${{ vars.R2_BUCKET_NAME }} \
+            --query 'Contents[].Key' \
+            --output text | awk '{print "${{ vars.R2_PUBLIC_BASE_URL }}/" $1}' > ${{ vars.URLS_FILE }}
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@users.noreply.github.com"
+          git add ${{ vars.URLS_FILE }}
+          git diff --staged --quiet || (git commit -m "Update R2 URLs list" && git push)
+
