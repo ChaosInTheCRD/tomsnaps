@@ -3,7 +3,7 @@ title        = "Tomsnaps"
 disableKinds = ["section", "taxonomy", "term"]
 
 
-timeout = "60s"
+timeout = "300s"
 
 [timeouts]
   # Increase the template execution timeout to 60 seconds
