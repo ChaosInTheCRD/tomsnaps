@@ -2,6 +2,9 @@ baseURL      = "https://www.example.com/"
 title        = "Tomsnaps"
 disableKinds = ["section", "taxonomy", "term"]
 
+
+timeout = "60s"
+
 [timeouts]
   # Increase the template execution timeout to 60 seconds
   render = "60s"
