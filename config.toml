@@ -2,6 +2,10 @@ baseURL      = "https://www.example.com/"
 title        = "Tomsnaps"
 disableKinds = ["section", "taxonomy", "term"]
 
+[timeouts]
+  # Increase the template execution timeout to 60 seconds
+  render = "60s"
+
 [params]
     # Set to enable Plausible Analytics.
     plausible_domain = ""
